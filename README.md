@@ -106,6 +106,30 @@ If you need to trigger a deployment manually:
 - The `homepage` field in package.json is set to `https://abhimanyug.github.io/app`
 - Environment variable `PUBLIC_URL` is set to `/app` during build
 
+### GitHub Repository Settings
+
+After pushing these changes to your repository, you need to configure GitHub settings:
+
+1. **Enable GitHub Pages**:
+   - Go to your GitHub repository
+   - Click on "Settings" tab
+   - Scroll down to the "Pages" section in the left sidebar
+   - Under "Build and deployment":
+     - For **Source**, select "Deploy from a branch"
+     - For **Branch**, select "gh-pages" and "/ (root)"
+     - Click "Save"
+
+2. **Configure Workflow Permissions**:
+   - Go to "Settings" > "Actions" > "General"
+   - Scroll down to "Workflow permissions"
+   - Select "Read and write permissions"
+   - Check "Allow GitHub Actions to create and approve pull requests"
+   - Click "Save"
+
+3. **Verify Deployment**:
+   - After the workflow runs successfully, your site will be available at https://abhimanyug.github.io/app
+   - You may need to wait a few minutes for the changes to propagate
+
 ## Notes for Real-World Implementation
 
 This is a demo application with some simulated functionality:
