@@ -26,7 +26,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          PUBLIC_URL: /app
+          PUBLIC_URL: /react-auth-app
         
       - name: Disable Jekyll Processing
         run: touch build/.nojekyll

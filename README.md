@@ -80,14 +80,14 @@ This application is configured for automatic deployment to GitHub Pages using Gi
 
 ### GitHub Pages Deployment
 
-The app will be deployed to: https://abhimanyug.github.io/app
+The app will be deployed to: https://abhimanyug.github.io/react-auth-app
 
 The deployment is handled by a GitHub Actions workflow that automatically builds and deploys the app whenever changes are pushed to the main branch.
 
 ### How It Works
 
 1. When you push to the `main` branch, the GitHub Actions workflow is triggered
-2. The workflow builds the React app with the correct base path (/app)
+2. The workflow builds the React app with the correct base path (/react-auth-app)
 3. The build output is deployed to the `gh-pages` branch
 4. GitHub Pages serves the content from the `gh-pages` branch
 
@@ -103,8 +103,8 @@ If you need to trigger a deployment manually:
 ### Technical Details
 
 - Using HashRouter for client-side routing compatibility with GitHub Pages
-- The `homepage` field in package.json is set to `https://abhimanyug.github.io/app`
-- Environment variable `PUBLIC_URL` is set to `/app` during build
+- The `homepage` field in package.json is set to `https://abhimanyug.github.io/react-auth-app`
+- Environment variable `PUBLIC_URL` is set to `/react-auth-app` during build
 - A `.nojekyll` file is added to prevent GitHub Pages from processing the build output with Jekyll
 
 ### GitHub Repository Settings
@@ -128,7 +128,7 @@ After pushing these changes to your repository, you need to configure GitHub set
    - Click "Save"
 
 3. **Verify Deployment**:
-   - After the workflow runs successfully, your site will be available at https://abhimanyug.github.io/app
+   - After the workflow runs successfully, your site will be available at https://abhimanyug.github.io/react-auth-app
    - You may need to wait a few minutes for the changes to propagate
 
 ## Notes for Real-World Implementation
