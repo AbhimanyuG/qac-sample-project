@@ -105,6 +105,7 @@ If you need to trigger a deployment manually:
 - Using HashRouter for client-side routing compatibility with GitHub Pages
 - The `homepage` field in package.json is set to `https://abhimanyug.github.io/app`
 - Environment variable `PUBLIC_URL` is set to `/app` during build
+- A `.nojekyll` file is added to prevent GitHub Pages from processing the build output with Jekyll
 
 ### GitHub Repository Settings
 
