@@ -41,7 +41,7 @@ flowchart TB
 
 2. **GitHub Actions CI/CD**:
    - Triggered on push to main branch
-   - Checks required secrets (TC_PROJECT_ID and TC_API_KEY)
+   - Checks required variables (TC_PROJECT_ID) and secrets (TC_API_KEY)
    - Installs dependencies and QACopilot
    - Builds the application
    - Deploys to GitHub Pages (production)

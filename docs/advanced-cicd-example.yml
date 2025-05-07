@@ -12,13 +12,14 @@ on:
 
 jobs:
   # Check secrets are available
-  check-secrets:
+  check-variables:
     runs-on: ubuntu-latest
     steps:
-      - name: Check Required Secrets
+      - name: Check Required Variables and Secrets
         run: |
-          if [ -z "${{ secrets.TC_PROJECT_ID }}" ]; then
-            echo "Error: TC_PROJECT_ID secret is not set."
+          if [ -z "${{ vars.TC_PROJECT_ID }}" ]; then
+            echo "Error: TC_PROJECT_ID variable is not set."
+            echo "Add it in Settings > Secrets and variables > Actions > Variables."
             exit 1
           fi
           
@@ -62,7 +63,7 @@ jobs:
 
   # Deploy to staging environment
   deploy-to-staging:
-    needs: [check-secrets, lint-and-test]
+    needs: [check-variables, lint-and-test]
     if: github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
@@ -106,7 +107,7 @@ jobs:
           node bin/qac.js \
             --build staging-test-build \
             --app_url https://staging.example.com/react-auth-app/ \
-            --tc_project_id ${{ secrets.TC_PROJECT_ID }} \
+            --tc_project_id ${{ vars.TC_PROJECT_ID }} \
             --api_key ${{ secrets.TC_API_KEY }}
         working-directory: ./react-auth-app
         env:
@@ -160,7 +161,7 @@ jobs:
           node bin/qac.js \
             --build prod-test-build \
             --app_url https://abhimanyug.github.io/react-auth-app/ \
-            --tc_project_id ${{ secrets.TC_PROJECT_ID }} \
+            --tc_project_id ${{ vars.TC_PROJECT_ID }} \
             --api_key ${{ secrets.TC_API_KEY }}
         working-directory: ./react-auth-app
         env:
