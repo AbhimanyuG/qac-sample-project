@@ -63,7 +63,7 @@ jobs:
           
       - name: Run QACopilot Tests Against Production
         run: |
-          qac \
+          npx qac \
             --build prod-test-build \
             --app_url https://abhimanyug.github.io/react-auth-app/ \
             --tc_project_id ${{ secrets.TC_PROJECT_ID }} \
