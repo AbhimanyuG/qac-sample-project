@@ -8,7 +8,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
-    "qa-copilot-ci": "file:qa-copilot-ci-1.0.0.tgz",
+    "qa-copilot-ci": "github:TCSoftInc/qa-copilot-ci",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.5.2",
@@ -23,7 +23,7 @@
     "test:local": "./scripts/run-local-tests.sh",
     "test:staging": "./scripts/run-staging-tests.sh",
     "test:prod": "./scripts/run-prod-tests.sh",
-    "install:qac": "npm install ./qa-copilot-ci-1.0.0.tgz"
+    "install:qac": "npm install github:TCSoftInc/qa-copilot-ci"
   },
   "eslintConfig": {
     "extends": [

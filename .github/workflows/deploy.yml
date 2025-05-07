@@ -45,7 +45,7 @@ jobs:
         run: npm ci
         
       - name: Install QACopilot CLI
-        run: npm install ./qa-copilot-ci-1.0.0.tgz
+        run: npm install github:TCSoftInc/qa-copilot-ci
 
       - name: Build Application
         run: npm run build
