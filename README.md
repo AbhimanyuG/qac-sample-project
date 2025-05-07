@@ -141,10 +141,11 @@ After pushing these changes to your repository, you need to configure GitHub set
 
 3. **Add Required Secrets**:
    - Go to "Settings" > "Secrets and variables" > "Actions"
-   - Add the following repository secrets:
+   - Add the following **Repository Secrets** (NOT Environment Secrets):
      - `TC_PROJECT_ID`: Your QACopilot project ID
      - `TC_API_KEY`: Your QACopilot API key
-   - These secrets are required for the QACopilot testing phase
+   - These must be set as **Repository Secrets** for the GitHub Actions workflow to access them
+   - IMPORTANT: Make sure to add these as Repository Secrets (under the "Secrets" tab), not as Environment Secrets. The current workflow's `check-secrets` job cannot access Environment Secrets.
 
 4. **Verify Deployment**:
    - After the workflow runs successfully, your site will be available at https://abhimanyug.github.io/react-auth-app

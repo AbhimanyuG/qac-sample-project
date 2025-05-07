@@ -9,19 +9,21 @@ jobs:
   check-secrets:
     runs-on: ubuntu-latest
     steps:
-      - name: Check Required Secrets
+      - name: Check Required Repository Secrets
         run: |
           if [ -z "${{ secrets.TC_PROJECT_ID }}" ]; then
-            echo "Error: TC_PROJECT_ID secret is not set. Please add it in repository settings."
+            echo "Error: TC_PROJECT_ID repository secret is not set."
+            echo "Add it in Settings > Secrets and variables > Actions > Repository secrets (NOT Environment secrets)."
             exit 1
           fi
           
           if [ -z "${{ secrets.TC_API_KEY }}" ]; then
-            echo "Error: TC_API_KEY secret is not set. Please add it in repository settings."
+            echo "Error: TC_API_KEY repository secret is not set."
+            echo "Add it in Settings > Secrets and variables > Actions > Repository secrets (NOT Environment secrets)."
             exit 1
           fi
           
-          echo "All required secrets are set!"
+          echo "✅ All required repository secrets are set!"
 
   build-deploy-and-test:
     needs: check-secrets
@@ -37,7 +39,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-          cache-dependency-path: react-auth-app/package-lock.json
+          cache-dependency-path: '**/package-lock.json'
           
       - name: Install Main Dependencies
         run: npm ci
