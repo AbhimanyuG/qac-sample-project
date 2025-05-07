@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy to Production (GitHub Pages) and Test
 
 on:
   push:
@@ -6,10 +6,28 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  check-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Required Secrets
+        run: |
+          if [ -z "${{ secrets.TC_PROJECT_ID }}" ]; then
+            echo "Error: TC_PROJECT_ID secret is not set. Please add it in repository settings."
+            exit 1
+          fi
+          
+          if [ -z "${{ secrets.TC_API_KEY }}" ]; then
+            echo "Error: TC_API_KEY secret is not set. Please add it in repository settings."
+            exit 1
+          fi
+          
+          echo "All required secrets are set!"
+
+  build-deploy-and-test:
+    needs: check-secrets
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write # Required for github-pages-deploy-action
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,20 +37,39 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+          cache-dependency-path: react-auth-app/package-lock.json
           
-      - name: Install Dependencies
+      - name: Install Main Dependencies
         run: npm ci
+        working-directory: ./react-auth-app
         
-      - name: Build
+      - name: Install QACopilot CLI
+        run: npm install ./qa-copilot-ci-1.0.0.tgz
+        working-directory: ./react-auth-app
+
+      - name: Build Application
         run: npm run build
+        working-directory: ./react-auth-app
         env:
           PUBLIC_URL: /react-auth-app
         
-      - name: Disable Jekyll Processing
+      - name: Disable Jekyll Processing for gh-pages
         run: touch build/.nojekyll
+        working-directory: ./react-auth-app
         
-      - name: Deploy
+      - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: build
+          folder: react-auth-app/build
           branch: gh-pages
+          
+      - name: Run QACopilot Tests Against Production
+        run: |
+          node bin/qac.js \
+            --build prod-test-build \
+            --app_url https://abhimanyug.github.io/react-auth-app/ \
+            --tc_project_id ${{ secrets.TC_PROJECT_ID }} \
+            --api_key ${{ secrets.TC_API_KEY }}
+        working-directory: ./react-auth-app
+        env:
+          NODE_ENV: test

@@ -74,22 +74,34 @@ The application will be available at http://localhost:3000
 
 The application includes Gherkin format test specifications in the `/tests/features` directory. These can be implemented with testing frameworks like Cucumber.js or Jest with appropriate plugins.
 
-## Deployment
+## Deployment & Testing Workflow
 
-This application is configured for automatic deployment to GitHub Pages using GitHub Actions.
+This application uses a CI/CD pipeline for deployment and testing, with support for different environments.
 
-### GitHub Pages Deployment
+### CI/CD Pipeline Overview
 
-The app will be deployed to: https://abhimanyug.github.io/react-auth-app
+The deployment and testing process follows this pattern:
 
-The deployment is handled by a GitHub Actions workflow that automatically builds and deploys the app whenever changes are pushed to the main branch.
+1. Code is developed locally and tested with `npm run test:local`
+2. When ready, code can be deployed to a staging environment (if available) and verified with `npm run test:staging`
+3. After staging verification, code is pushed to GitHub, triggering the production deployment workflow
+4. GitHub Actions automatically deploys to GitHub Pages (production)
+5. After production deployment, automated tests run to verify the live site works correctly
 
-### How It Works
+### GitHub Pages Production Deployment
+
+The production app is deployed to: https://abhimanyug.github.io/react-auth-app
+
+The deployment and testing are handled by a GitHub Actions workflow that automatically builds, deploys, and tests the app whenever changes are pushed to the main branch.
+
+### How the Production Workflow Works
 
 1. When you push to the `main` branch, the GitHub Actions workflow is triggered
-2. The workflow builds the React app with the correct base path (/react-auth-app)
-3. The build output is deployed to the `gh-pages` branch
-4. GitHub Pages serves the content from the `gh-pages` branch
+2. The workflow checks for required secrets (TC_PROJECT_ID and TC_API_KEY)
+3. The workflow builds the React app with the correct base path (/react-auth-app)
+4. The build output is deployed to the `gh-pages` branch
+5. GitHub Pages serves the content from the `gh-pages` branch
+6. After successful deployment, QACopilot tests are run against the production URL
 
 ### Manual Deployment
 
@@ -127,9 +139,85 @@ After pushing these changes to your repository, you need to configure GitHub set
    - Check "Allow GitHub Actions to create and approve pull requests"
    - Click "Save"
 
-3. **Verify Deployment**:
+3. **Add Required Secrets**:
+   - Go to "Settings" > "Secrets and variables" > "Actions"
+   - Add the following repository secrets:
+     - `TC_PROJECT_ID`: Your QACopilot project ID
+     - `TC_API_KEY`: Your QACopilot API key
+   - These secrets are required for the QACopilot testing phase
+
+4. **Verify Deployment**:
    - After the workflow runs successfully, your site will be available at https://abhimanyug.github.io/react-auth-app
+   - You can check the Actions tab to view test results
    - You may need to wait a few minutes for the changes to propagate
+
+## Testing
+
+The application includes multiple levels of testing:
+
+1. **Gherkin Feature Specifications**:
+   - Located in `/tests/features` directory
+   - Define behavior using Given-When-Then syntax
+   - Can be implemented with frameworks like Cucumber.js or Jest
+
+2. **QACopilot Automated Testing**:
+   - Run automatically after deployment to GitHub Pages
+   - Tests the live application using the deployed URL
+   - Uses the feature files in the `/tests/features` directory
+   - Results are reported in the GitHub Actions workflow
+
+### Running Tests Locally
+
+To run QACopilot tests against your locally deployed app:
+
+1. Set up your environment variables:
+   - Copy `.env.example` to `.env` and fill in your QACopilot credentials
+   - Or export them directly: 
+     ```
+     export TC_PROJECT_ID=your_project_id
+     export TC_API_KEY=your_api_key
+     ```
+
+2. Install the QACopilot package:
+   ```
+   npm run install:qac
+   ```
+
+3. Start the local development server:
+   ```
+   npm start
+   ```
+
+4. In a separate terminal, run the tests:
+   ```
+   npm run test:local
+   ```
+
+### Running Tests Against Environments
+
+#### Production Testing
+
+To test the deployed version on GitHub Pages production:
+
+1. Set up your environment variables as described above.
+
+2. Run the production tests:
+   ```
+   npm run test:prod
+   ```
+
+#### Staging Testing
+
+To test a staging environment:
+
+1. Set up your environment variables as described above.
+
+2. Run the staging tests with a custom URL:
+   ```
+   npm run test:staging -- https://your-staging-url.com
+   ```
+
+   Note: The default staging URL in the script should be updated to your actual staging URL when you set one up.
 
 ## Notes for Real-World Implementation
 
@@ -138,4 +226,8 @@ This is a demo application with some simulated functionality:
 - **Authentication**: Replace the mock auth with a real authentication service 
 - **Data**: Connect to a real API for user data
 - **Security**: Implement proper security measures for a production app
-- **Tests**: Implement the provided Gherkin test specifications with a testing framework
+- **CI/CD Pipeline**: The current setup can be extended to include:
+  - Linting and code quality checks
+  - Unit and integration tests before deployment
+  - Deployment to multiple environments (dev, staging, production)
+  - Rollback strategies for failed deployments

@@ -1,0 +1,190 @@
+# Example of a more advanced CI/CD pipeline with staging and production deployments
+# This is a reference file and not meant to be used as-is
+
+name: Full CI/CD Pipeline with Staging and Production
+
+on:
+  push:
+    branches: [ develop ]  # Trigger on push to develop branch for staging
+  pull_request:
+    branches: [ main ]     # Trigger on PR to main branch
+  workflow_dispatch:       # Manual trigger option
+
+jobs:
+  # Check secrets are available
+  check-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Required Secrets
+        run: |
+          if [ -z "${{ secrets.TC_PROJECT_ID }}" ]; then
+            echo "Error: TC_PROJECT_ID secret is not set."
+            exit 1
+          fi
+          
+          if [ -z "${{ secrets.TC_API_KEY }}" ]; then
+            echo "Error: TC_API_KEY secret is not set."
+            exit 1
+          fi
+          
+          if [ -z "${{ secrets.STAGING_DEPLOY_KEY }}" ]; then
+            echo "Error: STAGING_DEPLOY_KEY secret is not set."
+            exit 1
+          fi
+          
+          echo "All required secrets are set!"
+
+  # Run linting and unit tests
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: react-auth-app/package-lock.json
+          
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: ./react-auth-app
+        
+      - name: Run Linter
+        run: npm run lint
+        working-directory: ./react-auth-app
+        
+      - name: Run Unit Tests
+        run: npm run test:unit
+        working-directory: ./react-auth-app
+
+  # Deploy to staging environment
+  deploy-to-staging:
+    needs: [check-secrets, lint-and-test]
+    if: github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: react-auth-app/package-lock.json
+          
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: ./react-auth-app
+        
+      - name: Build for Staging
+        run: npm run build
+        working-directory: ./react-auth-app
+        env:
+          PUBLIC_URL: /
+          REACT_APP_API_URL: https://api-staging.example.com
+        
+      - name: Deploy to Staging Server
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "react-auth-app/build/"
+          REMOTE_HOST: ${{ secrets.STAGING_HOST }}
+          REMOTE_USER: ${{ secrets.STAGING_USER }}
+          TARGET: ${{ secrets.STAGING_PATH }}
+          
+      - name: Install QACopilot CLI
+        run: npm install ./qa-copilot-ci-1.0.0.tgz
+        working-directory: ./react-auth-app
+          
+      - name: Run Tests on Staging
+        run: |
+          node bin/qac.js \
+            --build staging-test-build \
+            --app_url https://staging.example.com/react-auth-app/ \
+            --tc_project_id ${{ secrets.TC_PROJECT_ID }} \
+            --api_key ${{ secrets.TC_API_KEY }}
+        working-directory: ./react-auth-app
+        env:
+          NODE_ENV: test
+
+  # Deploy to production (GitHub Pages)
+  deploy-to-production:
+    needs: [deploy-to-staging]
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_to_prod == 'true')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: react-auth-app/package-lock.json
+          
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: ./react-auth-app
+        
+      - name: Build for Production
+        run: npm run build
+        working-directory: ./react-auth-app
+        env:
+          PUBLIC_URL: /react-auth-app
+          REACT_APP_API_URL: https://api.example.com
+        
+      - name: Disable Jekyll Processing
+        run: touch build/.nojekyll
+        working-directory: ./react-auth-app
+        
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: react-auth-app/build
+          branch: gh-pages
+          
+      - name: Install QACopilot CLI
+        run: npm install ./qa-copilot-ci-1.0.0.tgz
+        working-directory: ./react-auth-app
+          
+      - name: Run Tests on Production
+        run: |
+          node bin/qac.js \
+            --build prod-test-build \
+            --app_url https://abhimanyug.github.io/react-auth-app/ \
+            --tc_project_id ${{ secrets.TC_PROJECT_ID }} \
+            --api_key ${{ secrets.TC_API_KEY }}
+        working-directory: ./react-auth-app
+        env:
+          NODE_ENV: test
+
+  # Notify team of deployment results
+  notify:
+    needs: [deploy-to-production]
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - name: Check job status
+        run: echo "Previous job status was ${{ needs.deploy-to-production.result }}"
+      
+      - name: Notify on success
+        if: ${{ needs.deploy-to-production.result == 'success' }}
+        # Add steps to notify on Slack, email, etc.
+        run: |
+          echo "Production deployment and testing completed successfully"
+          # Add notification commands here
+          
+      - name: Notify on failure
+        if: ${{ needs.deploy-to-production.result != 'success' }}
+        # Add steps to notify on Slack, email, etc.
+        run: |
+          echo "Production deployment or testing failed"
+          # Add notification commands here
