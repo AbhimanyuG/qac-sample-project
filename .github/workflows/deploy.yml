@@ -50,7 +50,7 @@ jobs:
       - name: Build Application
         run: npm run build
         env:
-          PUBLIC_URL: /react-auth-app
+          PUBLIC_URL: /qac-sample-project
         
       - name: Disable Jekyll Processing for gh-pages
         run: touch build/.nojekyll

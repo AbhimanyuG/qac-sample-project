@@ -51,15 +51,15 @@ jobs:
           
       - name: Install Dependencies
         run: npm ci
-        working-directory: ./react-auth-app
+        
         
       - name: Run Linter
         run: npm run lint
-        working-directory: ./react-auth-app
+        
         
       - name: Run Unit Tests
         run: npm run test:unit
-        working-directory: ./react-auth-app
+        
 
   # Deploy to staging environment
   deploy-to-staging:
@@ -79,11 +79,11 @@ jobs:
           
       - name: Install Dependencies
         run: npm ci
-        working-directory: ./react-auth-app
+        
         
       - name: Build for Staging
         run: npm run build
-        working-directory: ./react-auth-app
+        
         env:
           PUBLIC_URL: /
           REACT_APP_API_URL: https://api-staging.example.com
@@ -100,7 +100,7 @@ jobs:
           
       - name: Install QACopilot CLI
         run: npm install ./qa-copilot-ci-1.0.0.tgz
-        working-directory: ./react-auth-app
+        
           
       - name: Run Tests on Staging
         run: |
@@ -109,7 +109,7 @@ jobs:
             --app_url https://staging.example.com/react-auth-app/ \
             --tc_project_id ${{ vars.TC_PROJECT_ID }} \
             --api_key ${{ secrets.TC_API_KEY }}
-        working-directory: ./react-auth-app
+        
         env:
           NODE_ENV: test
 
@@ -133,18 +133,18 @@ jobs:
           
       - name: Install Dependencies
         run: npm ci
-        working-directory: ./react-auth-app
+        
         
       - name: Build for Production
         run: npm run build
-        working-directory: ./react-auth-app
+        
         env:
           PUBLIC_URL: /react-auth-app
           REACT_APP_API_URL: https://api.example.com
         
       - name: Disable Jekyll Processing
         run: touch build/.nojekyll
-        working-directory: ./react-auth-app
+        
         
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
@@ -154,7 +154,7 @@ jobs:
           
       - name: Install QACopilot CLI
         run: npm install ./qa-copilot-ci-1.0.0.tgz
-        working-directory: ./react-auth-app
+        
           
       - name: Run Tests on Production
         run: |
@@ -163,7 +163,7 @@ jobs:
             --app_url https://abhimanyug.github.io/react-auth-app/ \
             --tc_project_id ${{ vars.TC_PROJECT_ID }} \
             --api_key ${{ secrets.TC_API_KEY }}
-        working-directory: ./react-auth-app
+        
         env:
           NODE_ENV: test
 
